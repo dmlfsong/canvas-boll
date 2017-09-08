@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<style type="text/css">
+		canvas{
+				background:#B61924;
+			}
+	</style>
+	<body>
+		<canvas id="myCanvas">
+			请升级浏览器！
+		</canvas>
+		<script type="text/javascript">
+			var w = window.innerWidth,
+				h = window.innerHeight;
+			var amount = 50;
+			var canvas = document.getElementById('myCanvas');
+			var ctx = canvas.getContext('2d');
+			canvas.width = w;
+			canvas.height = h;
+			//随机函数
+			function randNum(min,max){
+				return parseInt((max-min+1)*Math.random()+min)	
+			}
+			//创建圆对象  xy为圆心坐标 r半径  speed速度
+			function Circle(x, y, r, speedX, speedY){
+				this.x = x; this.y = y; this.r = r;
+				this.speedX = speedX;
+				this.speedY = speedY;
+			}
+			//添加绘制方法
+			Circle.prototype.draw = function(){
+				ctx.fillStyle = 'rgba(255,255,255,0.9)';
+				ctx.beginPath();
+				ctx.arc(this.x, this.y,this.r,0, Math.PI*2,true);
+				ctx.fill();
+				return this;
+			}
+			//移动方法
+			Circle.prototype.move = function(){
+//				console.log('aaa')
+				if(this.x>w){
+					this.x = this.r
+				}
+				if(this.y> h){
+					this.y = this.r
+				}
+				if(this.x< this.r){
+					this.x = w
+				}
+				if(this.y< this.r){
+					this.y = h
+				}
+				this.x += this.speedX;
+				this.y += this.speedY;
+			}
+			
+			//线
+			function Line(x, y, _x, _y, t){
+				this.startX = x,this.startY = y,
+				this.endX = _x, this.endY = _y, this.transparency = t;
+			}
+			//
+			Line.prototype.paint = function(){
+				ctx.strokeStyle ='rgba(255,255,255,'+this.transparency+')';
+				ctx.beginPath();
+				ctx.moveTo(this.startX,this.startY);
+				ctx.lineTo(this.endX,this.endY);
+				ctx.stroke();
+				ctx.closePath()
+			}
+			var circleArr = [];
+			function init(){
+				for(var i = 0;i<amount;i++){
+//					var color = 'rgba('+randNum(0,256)+','+randNum(0,256)+','+randNum(0,256)+','+randNum(0,1)+')'
+					var speedX =randNum(-4,4)/3-0.05;
+					var speedY =randNum(-4,4)/3-0.05;
+					var r = randNum(3,3);
+					var circle = new Circle(randNum(0,w),randNum(0,h),r,speedX,speedY);
+					circle.draw();
+					circleArr.push(circle);
+				}			
+			}
+			function run(){
+				ctx.clearRect(0,0,w,h);
+				document.onmousemove = function (e){
+					circleArr = circleArr.slice(0,amount);
+					var x = e.pageX,
+						y = e.pageY;
+					 var circle1 = new Circle(x,y,3,0,0);
+					 circleArr.push(circle1);
+					 circleArr = circleArr.slice(0,amount+1);
+			}
+				for(var i = 0; i< circleArr.length; i++){	
+					circleArr[i].draw().move()
+				for(var j = 0; j< i ;j++){
+					var d1 = Math.abs(circleArr[i].x - circleArr[j].x), 
+						d2 = Math.abs(circleArr[i].y - circleArr[j].y);
+					var d3 = Math.sqrt(d1*d1+d2*d2);
+					var O = 1/d3*6;
+					var t = O>0.03? 0.2:O;			
+					var line = new Line(circleArr[i].x, circleArr[i].y,circleArr[j].x, circleArr[j].y,t);
+						line.paint();
+			}
+				}	
+				window.requestAnimationFrame(run);
+			}
+			init()
+			run()
+			</script>
+	</body>
+</html>
